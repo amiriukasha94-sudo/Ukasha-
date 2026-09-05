@@ -1,0 +1,6 @@
+{
+  "name": "CleanGold",
+  "description": "CleanGold - Safe Scalper v1.20 prop firm trading dashboard with risk management, live chart, AI bot avatar, and voice alerts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
