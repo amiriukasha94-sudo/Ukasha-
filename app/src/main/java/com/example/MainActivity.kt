@@ -29,7 +29,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,10 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.AppThemeColor
 import com.example.data.BotState
-import com.example.data.Mt5VerificationStatus
 import com.example.data.TradingRepository
 import com.example.service.VoiceManager
-import com.example.ui.components.ConnectTradingPlatformModal
 import com.example.ui.components.DraggableFloatingBubble
 import com.example.ui.components.Mt5VerificationDialog
 import com.example.ui.components.SettingsDialog
@@ -99,19 +96,6 @@ class MainActivity : ComponentActivity() {
             var showSettingsDialog by remember { mutableStateOf(false) }
             var showUgxPaymentDialog by remember { mutableStateOf(false) }
             var showMt5VerificationDialog by remember { mutableStateOf(false) }
-            var showConnectPlatformModal by remember { mutableStateOf(false) }
-            var hasAutoPromptedVerification by remember { mutableStateOf(false) }
-
-            // Automatically display persistent Connect MT5/MT4 popup modal for unverified users
-            LaunchedEffect(currentScreen, userProfile.mt5VerificationStatus) {
-                if (currentScreen == AppScreen.DASHBOARD &&
-                    userProfile.mt5VerificationStatus != Mt5VerificationStatus.VERIFIED &&
-                    !hasAutoPromptedVerification
-                ) {
-                    showConnectPlatformModal = true
-                    hasAutoPromptedVerification = true
-                }
-            }
 
             CleanGoldTheme(themeColor = currentTheme) {
                 if (isPipMode) {
@@ -322,18 +306,12 @@ class MainActivity : ComponentActivity() {
                                         analytics = analytics,
                                         newsEvents = newsEvents,
                                         newsFilterConfig = newsFilterConfig,
-                                        onStartBot = {
-                                            if (userProfile.mt5VerificationStatus != Mt5VerificationStatus.VERIFIED) {
-                                                showConnectPlatformModal = true
-                                            } else {
-                                                repository.startBot()
-                                            }
-                                        },
+                                        onStartBot = { repository.startBot() },
                                         onStopBot = { repository.stopBot() },
                                         onTogglePause = { repository.toggleBotPause() },
                                         onOpenSettings = { showSettingsDialog = true },
                                         onOpenPayment = { showUgxPaymentDialog = true },
-                                        onOpenMt5Verification = { showConnectPlatformModal = true },
+                                        onOpenMt5Verification = { showMt5VerificationDialog = true },
                                         onToggleNewsFilter = { repository.toggleNewsFilter() },
                                         onNewsBufferChanged = { repository.updateNewsBuffer(it) },
                                         onNavigateToAdmin = { currentScreen = AppScreen.ADMIN },
@@ -382,19 +360,12 @@ class MainActivity : ComponentActivity() {
                             SettingsDialog(
                                 currentTheme = currentTheme,
                                 voiceConfig = voiceConfig,
-                                userProfile = userProfile,
                                 onThemeSelected = { repository.setTheme(it) },
                                 onVoiceConfigChanged = { repository.updateVoiceConfig(it) },
                                 onTestVoice = {
                                     voiceManager.speak(BotState.BUYING, voiceConfig)
                                 },
                                 onEnterPip = { enterPictureInPicture() },
-                                onOpenConnectPlatform = { showConnectPlatformModal = true },
-                                onUnlinkPlatform = {
-                                    repository.unlinkPlatform()
-                                    hasAutoPromptedVerification = false
-                                    showConnectPlatformModal = true
-                                },
                                 onDismiss = { showSettingsDialog = false }
                             )
                         }
@@ -411,31 +382,15 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // Persistent Connect MT5/MT4 Modal for Unverified Users
-                        if (showConnectPlatformModal || showMt5VerificationDialog) {
-                            ConnectTradingPlatformModal(
+                        // MT5 Verification Dialog Modal
+                        if (showMt5VerificationDialog) {
+                            Mt5VerificationDialog(
                                 currentTheme = currentTheme,
                                 userProfile = userProfile,
-                                onConnectAndVerify = { platform, account, broker, server, password, accountType, isReadOnly ->
-                                    repository.linkAndVerifyPlatform(
-                                        platform = platform,
-                                        accountNumber = account,
-                                        broker = broker,
-                                        server = server,
-                                        password = password,
-                                        accountType = accountType,
-                                        isReadOnly = isReadOnly
-                                    )
+                                onLinkAndVerify = { account, broker, pass, stmt ->
+                                    repository.linkAndVerifyMt5(account, broker, pass, stmt)
                                 },
-                                onDismiss = {
-                                    showConnectPlatformModal = false
-                                    showMt5VerificationDialog = false
-                                },
-                                onUnlink = {
-                                    repository.unlinkPlatform()
-                                    hasAutoPromptedVerification = false
-                                    showConnectPlatformModal = true
-                                }
+                                onDismiss = { showMt5VerificationDialog = false }
                             )
                         }
                     }

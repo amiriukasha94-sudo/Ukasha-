@@ -199,24 +199,173 @@ fun PovertyScalperBotDisplay(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // HIGH-QUALITY ANIMATED ROBOT GIRL AVATAR (REPLACES PLACEHOLDER)
+            // PERFECTLY BIG BOT PICTURE FRAME
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 6.dp),
+                    .height(avatarHeight)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Color(0xFF070709))
+                    .border(
+                        width = 1.5.dp,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                stateColor.copy(alpha = 0.8f * auraGlow),
+                                Color(0x18FFFFFF),
+                                stateColor.copy(alpha = 0.4f)
+                            )
+                        ),
+                        shape = RoundedCornerShape(22.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                RobotGirlAvatar(
-                    botState = botState,
-                    accentColor = accentColor,
-                    isSpeaking = isSpeaking,
-                    size = avatarHeight,
-                    showStatusBadge = true,
-                    showHoloHalo = true,
-                    onClick = {
-                        onTogglePause()
-                    }
+                // High-resolution Bot Portrait
+                Image(
+                    painter = painterResource(id = R.drawable.img_poverty_scalper_bot),
+                    contentDescription = "PovertyScalper 0.1 AI Robot",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
+
+                // High-Tech Cyber Visor Vignette
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color(0x22000000),
+                                    Color(0x99050508)
+                                )
+                            )
+                        )
+                )
+
+                // Animated Optic Laser Scanline sweeping down the face
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.5.dp)
+                        .align(Alignment.TopCenter)
+                        .padding(top = (avatarHeight.value * scanlineY).dp)
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    stateColor.copy(alpha = 0.3f),
+                                    stateColor,
+                                    Color.White,
+                                    stateColor,
+                                    stateColor.copy(alpha = 0.3f),
+                                    Color.Transparent
+                                )
+                            )
+                        )
+                )
+
+                // Holographic Corner Brackets (Sci-fi HUD framing)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(10.dp)
+                ) {
+                    Text(
+                        text = "╔",
+                        color = stateColor.copy(alpha = 0.8f),
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.align(Alignment.TopStart)
+                    )
+                    Text(
+                        text = "╗",
+                        color = stateColor.copy(alpha = 0.8f),
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.align(Alignment.TopEnd)
+                    )
+                    Text(
+                        text = "╚",
+                        color = stateColor.copy(alpha = 0.8f),
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.align(Alignment.BottomStart)
+                    )
+                    Text(
+                        text = "╝",
+                        color = stateColor.copy(alpha = 0.8f),
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.align(Alignment.BottomEnd)
+                    )
+                }
+
+                // Speaking Audio Waveform Overlaid on Bot
+                if (isSpeaking) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 12.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xCC000000))
+                            .border(1.dp, stateColor, RoundedCornerShape(12.dp))
+                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Mic,
+                                contentDescription = "Speaking",
+                                tint = stateColor,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Box(modifier = Modifier.width(3.dp).height(waveHeight1.dp).background(stateColor, CircleShape))
+                            Box(modifier = Modifier.width(3.dp).height(waveHeight2.dp).background(stateColor, CircleShape))
+                            Box(modifier = Modifier.width(3.dp).height(waveHeight3.dp).background(stateColor, CircleShape))
+                            Box(modifier = Modifier.width(3.dp).height(waveHeight2.dp).background(stateColor, CircleShape))
+                            Box(modifier = Modifier.width(3.dp).height(waveHeight1.dp).background(stateColor, CircleShape))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "VOICE ENGINE ACTIVE",
+                                color = stateColor,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+                }
+
+                // Status Badge Overlay at Bottom Left
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(12.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xD90A0A0E))
+                        .border(1.dp, Color(0x33FFFFFF), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Radar,
+                            contentDescription = null,
+                            tint = stateColor,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "AI OPTIC SCANNER 0.1",
+                            color = Color(0xFFE2E8F0),
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(14.dp))

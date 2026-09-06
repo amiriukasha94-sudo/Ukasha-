@@ -108,11 +108,7 @@ data class UserProfile(
     val mt5VerificationStatus: Mt5VerificationStatus = Mt5VerificationStatus.VERIFIED,
     val mt5Broker: String = "Exness (Raw Spread)",
     val verificationDocRef: String = "STMT-2026-XAU-981",
-    val subscriptionPlan: String = "Monthly VIP Scalper",
-    val platformType: String = "MT5",
-    val serverName: String = "Exness-Real19",
-    val accountType: String = "Live Real",
-    val isReadOnlyAccess: Boolean = true
+    val subscriptionPlan: String = "Monthly VIP Scalper"
 )
 
 data class TradingAnalytics(

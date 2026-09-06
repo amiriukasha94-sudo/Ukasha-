@@ -152,12 +152,6 @@ class TradingRepository(
     private fun loadSavedUser(): UserProfile {
         val email = prefs.getString("user_email", "demo.trader@cleangold.io") ?: "demo.trader@cleangold.io"
         val mt5 = prefs.getString("user_mt5", "8849201") ?: "8849201"
-        val platform = prefs.getString("user_platform", "MT5") ?: "MT5"
-        val broker = prefs.getString("user_broker", "Exness (Raw Spread)") ?: "Exness (Raw Spread)"
-        val server = prefs.getString("user_server", "Exness-Real19") ?: "Exness-Real19"
-        val accountType = prefs.getString("user_account_type", "Live Real") ?: "Live Real"
-        val isVerified = prefs.getBoolean("user_mt5_verified", false)
-
         return UserProfile(
             email = email,
             mt5Account = mt5,
@@ -169,12 +163,9 @@ class TradingRepository(
             equity = 12450.80,
             botPaused = false,
             theme = prefs.getString("user_theme", "gold") ?: "gold",
-            mt5Linked = isVerified,
-            mt5VerificationStatus = if (isVerified) Mt5VerificationStatus.VERIFIED else Mt5VerificationStatus.UNLINKED,
-            mt5Broker = broker,
-            platformType = platform,
-            serverName = server,
-            accountType = accountType
+            mt5Linked = true,
+            mt5VerificationStatus = Mt5VerificationStatus.VERIFIED,
+            mt5Broker = "Exness (Raw Spread)"
         )
     }
 
@@ -245,31 +236,21 @@ class TradingRepository(
         }
     }
 
-    // --- MT5/MT4 Trading Platform Linking & Verification ---
-    fun linkAndVerifyPlatform(
-        platform: String = "MT5",
-        accountNumber: String,
+    // --- MT5 Account Linking & Verification ---
+    fun linkAndVerifyMt5(
+        mt5Account: String,
         broker: String,
-        server: String,
-        password: String,
-        accountType: String = "Live Real",
-        isReadOnly: Boolean = true
+        investorPassword: String,
+        statementReference: String
     ) {
-        val cleanAccount = accountNumber.trim().ifBlank {
-            if (platform == "MT4") "40" + Random.nextInt(10000, 99999) else "8849" + Random.nextInt(100, 999)
-        }
+        val cleanAccount = mt5Account.trim().ifBlank { "8849" + Random.nextInt(100, 999) }
         val cleanBroker = broker.trim().ifBlank { "Exness (Raw Spread)" }
-        val cleanServer = server.trim().ifBlank { if (platform == "MT4") "Exness-Real9" else "Exness-Real19" }
-        val docRef = "LINKED-${platform}-${cleanAccount}"
+        val docRef = if (statementReference.isNotBlank()) statementReference.trim() else "STMT-2026-XAU-${Random.nextInt(100, 999)}"
 
         _currentUser.update {
             it.copy(
-                platformType = platform,
                 mt5Account = cleanAccount,
                 mt5Broker = cleanBroker,
-                serverName = cleanServer,
-                accountType = accountType,
-                isReadOnlyAccess = isReadOnly,
                 mt5Linked = true,
                 mt5VerificationStatus = Mt5VerificationStatus.VERIFIED,
                 verificationDocRef = docRef
@@ -277,42 +258,9 @@ class TradingRepository(
         }
 
         prefs.edit()
-            .putString("user_platform", platform)
             .putString("user_mt5", cleanAccount)
             .putString("user_broker", cleanBroker)
-            .putString("user_server", cleanServer)
-            .putString("user_account_type", accountType)
-            .putBoolean("user_mt5_verified", true)
             .apply()
-    }
-
-    fun unlinkPlatform() {
-        _currentUser.update {
-            it.copy(
-                mt5Linked = false,
-                mt5VerificationStatus = Mt5VerificationStatus.UNLINKED
-            )
-        }
-        prefs.edit()
-            .putBoolean("user_mt5_verified", false)
-            .apply()
-    }
-
-    fun linkAndVerifyMt5(
-        mt5Account: String,
-        broker: String,
-        investorPassword: String,
-        statementReference: String
-    ) {
-        linkAndVerifyPlatform(
-            platform = "MT5",
-            accountNumber = mt5Account,
-            broker = broker,
-            server = "Exness-Real19",
-            password = investorPassword,
-            accountType = "Live Real",
-            isReadOnly = true
-        )
     }
 
     // --- Chart Analyser Manual Scalp Trade Execution ---
@@ -382,11 +330,10 @@ class TradingRepository(
         }
     }
 
-    fun loginUser(email: String, mt5Account: String, isVerified: Boolean? = null) {
-        val verified = isVerified ?: prefs.getBoolean("user_mt5_verified", false)
+    fun loginUser(email: String, mt5Account: String) {
         val user = UserProfile(
             email = email,
-            mt5Account = mt5Account.ifBlank { if (verified) "8849" + Random.nextInt(100, 999) else "" },
+            mt5Account = mt5Account.ifBlank { "8849" + Random.nextInt(100, 999) },
             expiryDate = "2026-10-18",
             expiryDaysRemaining = 12,
             expiryHoursRemaining = 4,
@@ -395,17 +342,13 @@ class TradingRepository(
             equity = 12450.80,
             botPaused = false,
             theme = _theme.value.id,
-            mt5Linked = verified,
-            mt5VerificationStatus = if (verified) Mt5VerificationStatus.VERIFIED else Mt5VerificationStatus.UNLINKED,
-            platformType = prefs.getString("user_platform", "MT5") ?: "MT5",
-            mt5Broker = prefs.getString("user_broker", "Exness (Raw Spread)") ?: "Exness (Raw Spread)",
-            serverName = prefs.getString("user_server", "Exness-Real19") ?: "Exness-Real19"
+            mt5Linked = mt5Account.isNotBlank(),
+            mt5VerificationStatus = if (mt5Account.isNotBlank()) Mt5VerificationStatus.VERIFIED else Mt5VerificationStatus.PENDING_VERIFICATION
         )
         _currentUser.value = user
         prefs.edit()
             .putString("user_email", email)
             .putString("user_mt5", user.mt5Account)
-            .putBoolean("user_mt5_verified", verified)
             .apply()
 
         _allUsers.update { current ->
@@ -415,8 +358,7 @@ class TradingRepository(
     }
 
     fun logout() {
-        prefs.edit().putBoolean("user_mt5_verified", false).apply()
-        loginUser("demo.trader@cleangold.io", "", false)
+        loginUser("demo.trader@cleangold.io", "8849201")
     }
 
     // Admin panel actions

@@ -73,9 +73,8 @@ import com.example.data.UserProfile
 import com.example.ui.components.ChartAnalyser
 import com.example.ui.components.NewsSentimentCard
 import com.example.ui.components.PovertyScalperBotDisplay
-import com.example.ui.components.RobotGirlAvatar
+import com.example.ui.components.TeslaBotAvatar
 import com.example.ui.components.TradingChart
-import com.example.ui.components.UnverifiedPlatformDockedBanner
 
 @Composable
 fun DashboardScreen(
@@ -160,14 +159,20 @@ fun DashboardScreen(
                 ) {
                     // Left Brand: CleanGold - PovertyScalper 0.1
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        RobotGirlAvatar(
-                            botState = botState,
-                            accentColor = accentColor,
-                            isSpeaking = isBotSpeaking,
-                            size = 38.dp,
-                            showStatusBadge = false,
-                            showHoloHalo = false
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(accentColor),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "PS",
+                                color = Color(0xFF0A0A0A),
+                                fontWeight = FontWeight.Black,
+                                fontSize = 14.sp
+                            )
+                        }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -311,34 +316,19 @@ fun DashboardScreen(
                 }
             }
 
-            // PERSISTENT UNVERIFIED PLATFORM BANNER
-            if (userProfile.mt5VerificationStatus != Mt5VerificationStatus.VERIFIED) {
-                item {
-                    UnverifiedPlatformDockedBanner(
-                        currentTheme = currentTheme,
-                        onOpenConnectModal = onOpenMt5Verification
-                    )
-                }
-            }
-
-            // MT5/MT4 Verification & License Status Bar
+            // MT5 Verification & License Status Bar
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    // MT5/MT4 Link & Verification Badge
-                    val isVerified = userProfile.mt5VerificationStatus == Mt5VerificationStatus.VERIFIED
+                    // MT5 Link & Verification Badge
                     Box(
                         modifier = Modifier
                             .weight(1.3f)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(if (isVerified) Color(0xFF161616) else Color(0xFF241608))
-                            .border(
-                                1.dp,
-                                if (isVerified) Color(0x14FFFFFF) else Color(0xFFFFB300),
-                                RoundedCornerShape(14.dp)
-                            )
+                            .background(Color(0xFF161616))
+                            .border(1.dp, Color(0x14FFFFFF), RoundedCornerShape(14.dp))
                             .clickable { onOpenMt5Verification() }
                             .padding(horizontal = 12.dp, vertical = 10.dp)
                     ) {
@@ -351,20 +341,20 @@ fun DashboardScreen(
                                 Icon(
                                     imageVector = Icons.Default.Shield,
                                     contentDescription = null,
-                                    tint = if (isVerified) Color(0xFF00FF88) else Color(0xFFFFB300),
+                                    tint = if (userProfile.mt5VerificationStatus == Mt5VerificationStatus.VERIFIED) Color(0xFF00FF88) else accentColor,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Column {
                                     Text(
-                                        text = "${userProfile.platformType} #${if (userProfile.mt5Account.isNotBlank()) userProfile.mt5Account else "UNLINKED"}",
+                                        text = "MT5 #${userProfile.mt5Account}",
                                         color = Color.White,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        text = if (isVerified) "VERIFIED OWNERSHIP" else "CONNECT MT5/MT4",
-                                        color = if (isVerified) Color(0xFF00FF88) else Color(0xFFFFB300),
+                                        text = if (userProfile.mt5VerificationStatus == Mt5VerificationStatus.VERIFIED) "VERIFIED OWNERSHIP" else "CLICK TO VERIFY",
+                                        color = if (userProfile.mt5VerificationStatus == Mt5VerificationStatus.VERIFIED) Color(0xFF00FF88) else accentColor,
                                         fontSize = 8.sp,
                                         fontWeight = FontWeight.Black
                                     )

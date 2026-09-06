@@ -48,22 +48,15 @@ import androidx.compose.ui.window.Dialog
 import com.example.data.AppThemeColor
 import com.example.data.BotState
 import com.example.data.VoiceConfig
-import com.example.data.UserProfile
-import com.example.data.Mt5VerificationStatus
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.Shield
 
 @Composable
 fun SettingsDialog(
     currentTheme: AppThemeColor,
     voiceConfig: VoiceConfig,
-    userProfile: UserProfile? = null,
     onThemeSelected: (AppThemeColor) -> Unit,
     onVoiceConfigChanged: (VoiceConfig) -> Unit,
     onTestVoice: () -> Unit,
     onEnterPip: () -> Unit,
-    onOpenConnectPlatform: () -> Unit = {},
-    onUnlinkPlatform: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -281,114 +274,6 @@ fun SettingsDialog(
                 }
 
                 Spacer(modifier = Modifier.height(14.dp))
-
-                // MT5 / MT4 Platform Bridge Section
-                if (userProfile != null) {
-                    val isVerified = userProfile.mt5VerificationStatus == Mt5VerificationStatus.VERIFIED
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1B22)),
-                        border = CardDefaults.outlinedCardBorder().copy(
-                            brush = androidx.compose.ui.graphics.SolidColor(
-                                if (isVerified) Color(0x3300FF88) else Color(0x33FFB300)
-                            ),
-                            width = 1.dp
-                        )
-                    ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Link,
-                                        contentDescription = null,
-                                        tint = if (isVerified) Color(0xFF00FF88) else Color(0xFFFFB300),
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = "${userProfile.platformType} / MT4 BRIDGE",
-                                        color = Color.White,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(4.dp))
-                                        .background(if (isVerified) Color(0xFF14241A) else Color(0xFF2A1C0A))
-                                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                                ) {
-                                    Text(
-                                        text = if (isVerified) "VERIFIED" else "UNLINKED",
-                                        color = if (isVerified) Color(0xFF00FF88) else Color(0xFFFFB300),
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.Black
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = if (isVerified) {
-                                    "Connected to ${userProfile.platformType} #${userProfile.mt5Account} (${userProfile.mt5Broker}). Streaming performance telemetry."
-                                } else {
-                                    "Platform unverified. Connect your MT5 or MT4 credentials to enable performance tracking and live scalp execution."
-                                },
-                                color = Color(0xFF94A3B8),
-                                fontSize = 11.sp
-                            )
-
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Button(
-                                    onClick = {
-                                        onDismiss()
-                                        onOpenConnectPlatform()
-                                    },
-                                    modifier = Modifier.weight(1f).height(40.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = currentTheme.primary),
-                                    shape = RoundedCornerShape(10.dp)
-                                ) {
-                                    Text(
-                                        text = if (isVerified) "Re-Configure Platform" else "Connect MT5/MT4",
-                                        color = Color(0xFF0A0A0A),
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-
-                                if (isVerified) {
-                                    Button(
-                                        onClick = {
-                                            onUnlinkPlatform()
-                                            onDismiss()
-                                        },
-                                        modifier = Modifier.height(40.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C1616)),
-                                        shape = RoundedCornerShape(10.dp)
-                                    ) {
-                                        Text(
-                                            text = "Unlink",
-                                            color = Color(0xFFFF5252),
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(14.dp))
-                }
 
                 // WhatsApp Support & MoMo VIP Concierge (+256765014053)
                 Box(
